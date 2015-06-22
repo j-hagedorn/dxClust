@@ -1,0 +1,30 @@
+---
+title: "Multimorbidity Patterns"
+author: "for Behavioral Health Patients in the Lakeshore Region"
+output: html_document
+---
+
+The number of chronic conditions that a person has: 
+
+* affects behavioral health costs [^1]
+* increases mortality [^2]
+* increases inpatient and long-term care admissions 
+
+How can we better integrate and coordinate behavioral and medical health services to address these complex issues?
+
+
+```{r}
+summary(cars)
+```
+
+You can also embed plots, for example:
+
+```{r, echo=FALSE}
+plot(cars)
+```
+
+
+---
+## Notes
+[^1]: [Freeman, E., McGuire, C. A., Thomas, J. W., & Thayer, D. A. (2014). Factors affecting costs in Medicaid populations with behavioral health disorders. Medical care, 52, S60-S66.](http://journals.lww.com/lww-medicalcare/Fulltext/2014/03001/Factors_Affecting_Costs_in_Medicaid_Populations.12.aspx)
+[^2]: [Zeng, C., Ellis, J. L., Steiner, J. F., Shoup, J. A., McQuillan, D. B., & Bayliss, E. A. (2014). Assessment of morbidity over time in predicting health outcomes. Medical care, 52, S52-S59.](http://journals.lww.com/lww-medicalcare/Fulltext/2014/03001/Assessment_of_Morbidity_Over_Time_in_Predicting.11.aspx)

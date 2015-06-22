@@ -1,5 +1,14 @@
 require(arules)
 tbdat <- read.csv("~/tbdatUpdated.csv")
+
+# Remove bracketed CCS ID #s
+tbdat$CCS.Level.1 <- as.factor(gsub("\\[[^\\]]+\\]","",
+                                    tbdat$CCS.Level.1, perl=T))
+tbdat$CCS.Level.2 <- as.factor(gsub("\\[[^\\]]+\\]","",
+                                    tbdat$CCS.Level.2, perl=T))
+tbdat$CCS.Level.3 <- as.factor(gsub("\\[[^\\]]+\\]","",
+                                    tbdat$CCS.Level.3, perl=T))
+
 pIDs = sort(unique(tbdat$Patient.ID))
 pMorbidityList = list()
 pCount = 0
