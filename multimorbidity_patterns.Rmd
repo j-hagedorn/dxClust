@@ -4,6 +4,8 @@ author: "for Behavioral Health Patients in the Lakeshore Region"
 output: html_document
 ---
 
+## Context
+
 The number of chronic conditions that a person has: 
 
 * affects behavioral health costs [^1]
@@ -16,6 +18,14 @@ How can we better integrate and coordinate behavioral and medical health service
 ```{r}
 summary(cars)
 ```
+
+## Application
+
+### Care Coordination
+Large itemsets (>4) may be less actionable for cross-disciplinary efforts, especially when these diagnoses fall into different medical specialties, due to the difficulty in coordinating efforts across multiple parties for increasingly small numbers of patients.  That said, the larger itemsets do paint a picture which is helpful for care coordination.
+
+### Analytics Platform
+Display
 
 You can also embed plots, for example:
 

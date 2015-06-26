@@ -47,6 +47,8 @@ Temporary Items
 .txt
 .db
 .xlsx
+.RData
+.rda
 
 # History files
 .Rhistory
