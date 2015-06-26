@@ -43,12 +43,13 @@ Temporary Items
 .apdisk
 
 # Data files
-.csv
-.txt
-.db
-.xlsx
-.RData
-.rda
+*.csv
+*.txt
+*.db
+*.xlsx
+*.RData
+*.rda
+*.Rdata
 
 # History files
 .Rhistory
