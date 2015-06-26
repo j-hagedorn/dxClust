@@ -9,6 +9,9 @@ tbdat$CCS.Level.2 <- as.factor(gsub("\\[[^\\]]+\\]","",
 tbdat$CCS.Level.3 <- as.factor(gsub("\\[[^\\]]+\\]","",
                                     tbdat$CCS.Level.3, perl=T))
 
+library(dplyr)
+tbdat <- tbdat %>% filter(Chronic.Condition == "Y") %>% droplevels()
+
 pIDs = sort(unique(tbdat$Patient.ID))
 pMorbidityList = list()
 pCount = 0
