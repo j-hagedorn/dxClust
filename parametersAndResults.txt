@@ -1,0 +1,13 @@
+support = .1, minlen = 3: no frequent itemsets
+
+support = .1, minlen = 2: 123 frequent itemsets
+support = .09, minlen = 2: 164 frequent itemsets
+support = .09, minlen = 3: 2 frequent itemsets
+support = .05, minlen = 3: 730 frequent itemsets
+support = .05, minlen = 4: 41 frequent itemsets
+support = .03, minlen = 6: 6 frequent itemsets
+support = .01, minlen = 6: 82625 frequent itemsets
+support = .01, minlen = 10: 5 frequent itemsets
+support = .005, minlen = 13: 0 frequent itemsets
+support = .005, minlen = 12: 24 frequent itemsets
+support = .005, minlen = 11: 1199 frequent itemsets
