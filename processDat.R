@@ -1,6 +1,6 @@
 
 #rules <- apriori(myTrans, parameter=list(supp=.05,conf=.1,minlen=2))
-oPut <- eclat(patientTrans, parameter=list(supp=.02,minlen=2))
+oPut <- eclat(patientTrans, parameter=list(supp=.005,minlen=12,maxlen=250))
 oPut <- sort(oPut, by="support", decreasing=TRUE)
 freqItemsets <- as(oPut,"data.frame")
 numItemsets = length(oPut)
@@ -18,7 +18,7 @@ for (jj in (1:numItemsets)) {
     indexer[iLen, 2] = as.numeric(substr(idxs[kk],3,nchar(idxs[kk])))
   }
   iLen = iLen + 1
-  indexer[iLen, 2] = as.numeric(substr(idxs[kk],3,nchar(idxs[kk])-2))
+  indexer[iLen, 2] = as.numeric(substr(idxs[idxsLen],3,nchar(idxs[idxsLen])-2))
 }
 colnames(indexer) = c("itemsetIdx", "patientIdx")
 
@@ -57,5 +57,3 @@ itemsetPatientIDs <- function(requestedItemsetIdx = 0) {
     print(pIDs[pIdxsHavingItemset])
   }
 }
-
-# Get number of patients per itemset...
