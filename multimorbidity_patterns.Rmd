@@ -4,17 +4,36 @@ author: "for Behavioral Health Patients in the Lakeshore Region"
 output: html_document
 ---
 
+```{r, echo=FALSE,message=FALSE,warning=FALSE}
+
+```
+
+
 ## Context
 
-The number of chronic conditions that a person has: 
+Anyone who has provided behavioral health services to an individual understands that diagnoses do not limit their impact to one part of a person's life, but influence multiple areas of a person's day-to-day existence.  Multiple diagnoses, especially chronic conditions, have a cumulative impact across a person's life.  There is a systemic and economic effect as well.  Research indicates that the number of chronic conditions a person has: 
 
 * affects behavioral health costs [^1]
 * increases mortality [^2]
 * increases inpatient and long-term care admissions 
 
+## Questions
+
+What are the most prevalent multimorbidity patterns in the specialty behavioral health system for this region?  
+
+Which of these multimorbidity patterns accounts for the greatest proportion of spending in the region?  Of service use?
+
+Of high-cost/use multimorbidity patterns, which have a strong evidence base for effective treatments?
+
+Of multimorbidity patterns with indications for effective treatment, what proportion of patients with these patterns are receiving services from providers which may indicate the provision of this treatment? (e.g. by provider type or service code)
+
 How can we better integrate and coordinate behavioral and medical health services to address these complex issues?
 
+Of individuals with multimorbidity patterns with high service use, how many are receiving care management?
 
+
+
+## Data
 ```{r}
 summary(cars)
 ```
@@ -26,12 +45,6 @@ Large itemsets (>4) may be less actionable for cross-disciplinary efforts, espec
 
 ### Analytics Platform
 Display
-
-You can also embed plots, for example:
-
-```{r, echo=FALSE}
-plot(cars)
-```
 
 
 ---

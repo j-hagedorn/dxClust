@@ -1,5 +1,5 @@
 require(arules)
-tbdat <- read.csv("~/tbdatUpdated.csv")
+tbdat <- read.csv("tbdatUpdated.csv")
 
 # Remove bracketed CCS ID #s
 tbdat$CCS.Level.1 <- as.factor(gsub("\\[[^\\]]+\\]","",
@@ -7,6 +7,14 @@ tbdat$CCS.Level.1 <- as.factor(gsub("\\[[^\\]]+\\]","",
 tbdat$CCS.Level.2 <- as.factor(gsub("\\[[^\\]]+\\]","",
                                     tbdat$CCS.Level.2, perl=T))
 tbdat$CCS.Level.3 <- as.factor(gsub("\\[[^\\]]+\\]","",
+                                    tbdat$CCS.Level.3, perl=T))
+
+# Remove leading and trailing whitespace
+tbdat$CCS.Level.1 <- as.factor(gsub("^\\s+|\\s+$","",
+                                    tbdat$CCS.Level.1, perl=T))
+tbdat$CCS.Level.2 <- as.factor(gsub("^\\s+|\\s+$","",
+                                    tbdat$CCS.Level.2, perl=T))
+tbdat$CCS.Level.3 <- as.factor(gsub("^\\s+|\\s+$","",
                                     tbdat$CCS.Level.3, perl=T))
 
 library(dplyr)
