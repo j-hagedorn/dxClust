@@ -1,7 +1,8 @@
 ---
 title: "Multimorbidity Patterns"
 author: "for Behavioral Health Patients in the Lakeshore Region"
-output: html_document
+output: 
+  html_document
 ---
 
 ```{r, echo=FALSE,message=FALSE,warning=FALSE}
@@ -28,6 +29,8 @@ What are the most prevalent multimorbidity patterns in the specialty behavioral 
 How many of the frequent itemsets 
 
 Which of these multimorbidity patterns accounts for the greatest proportion of spending in the region?  Of service use?
+
+How many people have multiple conditions with similar symptomology and thus are potential candidates for differential diagnosis and revised tx planning?
 
 Of high-cost/use multimorbidity patterns, which have a strong evidence base for effective treatments?
 
