@@ -1,4 +1,4 @@
-require(arules)
+library(arules)
 tbdat <- read.csv("tbdatUpdated.csv")
 
 # Remove bracketed CCS ID #s

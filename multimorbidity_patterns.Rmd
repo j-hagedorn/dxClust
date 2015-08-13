@@ -1,11 +1,17 @@
 ---
 title: "Multimorbidity Patterns"
 author: "for Behavioral Health Patients in the Lakeshore Region"
-output: 
-  html_document
+output:
+  html_document: 
+    toc: true
+    toc_depth: 1
+    theme: cosmo 
+    highlight: tango
 ---
 
 ```{r, echo=FALSE,message=FALSE,warning=FALSE}
+source("loadTransactions.R")
+source("processDat.R")
 
 ```
 
@@ -44,7 +50,7 @@ Of individuals with multimorbidity patterns with high service use, how many are 
 
 ## Data
 ```{r}
-
+source("sunburst_ccs.R")
 ```
 
 ## Application
