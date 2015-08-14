@@ -12,13 +12,12 @@ output:
 ```{r, echo=FALSE,message=FALSE,warning=FALSE}
 source("loadTransactions.R")
 source("processDat.R")
-
 ```
 
 
 ## Context
 
-Anyone who has provided behavioral health services to an individual understands that diagnoses do not limit their impact to one part of a person's life, but influence multiple areas of a person's day-to-day existence.  Multiple diagnoses, especially chronic conditions, have a cumulative impact across a person's life.  There is a systemic and economic effect as well.[^1]  Research indicates that the number of chronic conditions a person has: 
+Anyone who has provided behavioral health services to an individual understands that diagnoses do not limit their impact to one part of a person's life, but influence multiple areas of a person's day-to-day existence.  Multiple diagnoses, especially chronic conditions, have a cumulative impact across a person's life.  There is a systemic and economic effect as well.[^1]  Research indicates that the number of chronic conditions which a person has: 
 
 * affects behavioral health costs [^2]
 * increases mortality [^3]
@@ -49,11 +48,85 @@ Of individuals with multimorbidity patterns with high service use, how many are 
 
 
 ## Data
-```{r}
-source("sunburst_ccs.R")
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+library(dplyr)
+library(magrittr)
+library(sunburstR)
+
+# Clean and format data
+  tst <- freqItemsets
+  tst$items <- gsub("{|}| ","",tst$items, perl=T) # remove brackets
+  spl <- strsplit(as.character(tst$items), split = ",")
+  n <- max(sapply(spl, length))
+  l <- lapply(spl, function(X) c(X, rep(NA, n - length(X))))
+  d <- data.frame(t(do.call(cbind, l)))
+  d$X1 <- stringr::str_sub(d$X1, start = 1, end = 13)
+  d$X2 <- stringr::str_sub(d$X2, start = 1, end = 13)
+  d$X3 <- stringr::str_sub(d$X3, start = 1, end = 13)
+  d$X4 <- stringr::str_sub(d$X4, start = 1, end = 13)
+  # Remove NAs from 3rd dx position before pasting
+  d$paths <- ifelse(!is.na(d$X3), 
+                    paste(d$X1,d$X2,d$X3,sep = "-"), 
+                    paste(d$X1,d$X2,sep = "-"))
+  # Remove NAs from 4th dx position before pasting
+  d$paths <- ifelse(!is.na(d$X4), 
+                    paste(d$paths,d$X4,sep = "-"), 
+                    d$paths)
+  tst <- cbind(freqItemsets,d)
+  tst$paths <- tolower(tst$paths)
+  tst$patients <- tst$support * pCount
+  tst$patients <- as.integer(tst$patients)
+  tst$paths <- as.factor(tst$paths)
+  tst %<>% select(paths, counts = patients)
+
+sunburst(tst)
+
 ```
 
 ## Application
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+tst <- freqItemsets
+tst$items <- gsub("{|}","",tst$items, perl=T) # remove brackets
+spl <- strsplit(as.character(tst$items), split = ",")
+n <- max(sapply(spl, length))
+l <- lapply(spl, function(X) c(X, rep(NA, n - length(X))))
+d <- data.frame(t(do.call(cbind, l)))
+d$search1 <- tolower(d$X1)
+d$search2 <- tolower(d$X2)
+d$search3 <- tolower(d$X3)
+d$search4 <- tolower(d$X4)
+
+# Use Systematic Review query logic
+# http://www.nlm.nih.gov/bsd/pubmed_subsets/sysreviews_strategy.html
+
+query <- paste0("(",d$search1," AND ",d$search2,") ",
+               ifelse(is.na(d$search3),
+                      yes = "",
+                      no = paste("OR (",d$search1," AND ",d$search3,") ")),
+               ifelse(is.na(d$search3),
+                      yes = "",
+                      no = paste("OR (",d$search2," AND ",d$search3,") ")),
+               "AND systematic[sb] ") # ,"AND comorbidity[mh]"
+
+d <- cbind(d,query)
+
+d$link <- paste0("http://www.ncbi.nlm.nih.gov/pubmed/?term=",
+                 gsub(pattern = " ", replacement = "+", x = d$query))
+
+d <- cbind(freqItemsets,d)
+
+library(DT)
+
+d %>% 
+  mutate(ref = paste0("<a href=",link,">",items,"</a>"),
+         pct = round(support * 100, digits = 1)) %>%
+  select(ref,pct) %>%
+  datatable(rownames = FALSE,
+                colnames = c('Multimorbidity Pattern', '% of Patients'),
+                escape = FALSE)
+```
+
 
 ### Care Management
 There are a number of reasons why care management interventions have not consistently been shown to decrease healthcare costs of high utilizers[^5]. One reason is that these patients are clinically heterogeneous, and their conditions are not consistently responsive to treatment. 
