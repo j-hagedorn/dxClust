@@ -1,27 +1,41 @@
 ---
 title: "Multimorbidity Patterns"
 author: "for Behavioral Health Patients in the Lakeshore Region"
-output: html_document
+output:
+  html_document: 
+    toc: true
+    toc_depth: 1
+    theme: cosmo 
+    highlight: tango
 ---
 
 ```{r, echo=FALSE,message=FALSE,warning=FALSE}
-
+source("loadTransactions.R")
+source("processDat.R")
 ```
 
 
 ## Context
 
-Anyone who has provided behavioral health services to an individual understands that diagnoses do not limit their impact to one part of a person's life, but influence multiple areas of a person's day-to-day existence.  Multiple diagnoses, especially chronic conditions, have a cumulative impact across a person's life.  There is a systemic and economic effect as well.  Research indicates that the number of chronic conditions a person has: 
+Anyone who has provided behavioral health services to an individual understands that diagnoses do not limit their impact to one part of a person's life, but influence multiple areas of a person's day-to-day existence.  Multiple diagnoses, especially chronic conditions, have a cumulative impact across a person's life.  There is a systemic and economic effect as well.[^1]  Research indicates that the number of chronic conditions which a person has: 
 
-* affects behavioral health costs [^1]
-* increases mortality [^2]
+* affects behavioral health costs [^2]
+* increases mortality [^3]
 * increases inpatient and long-term care admissions 
+
+A recent analysis of super-utilizer group characteristics found that 82% of super-utilizers had multiple comorbid chronic conditions.[^4] Knowing the number of conditions that a person has, however, does not provide enough insight to help population managers and service providers target clinical strategies for these high-priority populations.  In order to begin to develop proficiency in managing populations with complex chronic conditions, it will be critical to become aware of the patterns in which these conditions occur.  In other words, we can't treat "3 chronic conditions" but we can develop a strategy to address "cardiac dysrythmias, depression and hypertension".
+
+This analysis is intended as an initial step to help the PIHP to begin to target and prioritize specific opportunities for the development of integrated models for beneficiaries with serious mental illness, substance use disorders, developmental disabilities and chronic physical conditions.
 
 ## Questions
 
 What are the most prevalent multimorbidity patterns in the specialty behavioral health system for this region?  
 
+How many of the frequent itemsets 
+
 Which of these multimorbidity patterns accounts for the greatest proportion of spending in the region?  Of service use?
+
+How many people have multiple conditions with similar symptomology and thus are potential candidates for differential diagnosis and revised tx planning?
 
 Of high-cost/use multimorbidity patterns, which have a strong evidence base for effective treatments?
 
@@ -34,8 +48,39 @@ Of individuals with multimorbidity patterns with high service use, how many are 
 
 
 ## Data
-```{r}
-summary(cars)
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+library(dplyr)
+library(magrittr)
+library(sunburstR)
+
+# Clean and format data
+  tst <- freqItemsets
+  tst$items <- gsub("{|}| ","",tst$items, perl=T) # remove brackets
+  spl <- strsplit(as.character(tst$items), split = ",")
+  n <- max(sapply(spl, length))
+  l <- lapply(spl, function(X) c(X, rep(NA, n - length(X))))
+  d <- data.frame(t(do.call(cbind, l)))
+  d$X1 <- stringr::str_sub(d$X1, start = 1, end = 13)
+  d$X2 <- stringr::str_sub(d$X2, start = 1, end = 13)
+  d$X3 <- stringr::str_sub(d$X3, start = 1, end = 13)
+  d$X4 <- stringr::str_sub(d$X4, start = 1, end = 13)
+  # Remove NAs from 3rd dx position before pasting
+  d$paths <- ifelse(!is.na(d$X3), 
+                    paste(d$X1,d$X2,d$X3,sep = "-"), 
+                    paste(d$X1,d$X2,sep = "-"))
+  # Remove NAs from 4th dx position before pasting
+  d$paths <- ifelse(!is.na(d$X4), 
+                    paste(d$paths,d$X4,sep = "-"), 
+                    d$paths)
+  tst <- cbind(freqItemsets,d)
+  tst$paths <- tolower(tst$paths)
+  tst$patients <- tst$support * pCount
+  tst$patients <- as.integer(tst$patients)
+  tst$paths <- as.factor(tst$paths)
+  tst %<>% select(paths, counts = patients)
+
+sunburst(tst)
+
 ```
 
 ## Methodology
@@ -56,8 +101,54 @@ A long list of transactions was generated from the raw data, and used as input t
    itemset deemed "frequent" should contain.
 
 
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+tst <- freqItemsets
+tst$items <- gsub("{|}","",tst$items, perl=T) # remove brackets
+spl <- strsplit(as.character(tst$items), split = ",")
+n <- max(sapply(spl, length))
+l <- lapply(spl, function(X) c(X, rep(NA, n - length(X))))
+d <- data.frame(t(do.call(cbind, l)))
+d$search1 <- tolower(d$X1)
+d$search2 <- tolower(d$X2)
+d$search3 <- tolower(d$X3)
+d$search4 <- tolower(d$X4)
+
+# Use Systematic Review query logic
+# http://www.nlm.nih.gov/bsd/pubmed_subsets/sysreviews_strategy.html
+
+query <- paste0("(",d$search1," AND ",d$search2,") ",
+               ifelse(is.na(d$search3),
+                      yes = "",
+                      no = paste("OR (",d$search1," AND ",d$search3,") ")),
+               ifelse(is.na(d$search3),
+                      yes = "",
+                      no = paste("OR (",d$search2," AND ",d$search3,") ")),
+               "AND systematic[sb] ") # ,"AND comorbidity[mh]"
+
+d <- cbind(d,query)
+
+d$link <- paste0("http://www.ncbi.nlm.nih.gov/pubmed/?term=",
+                 gsub(pattern = " ", replacement = "+", x = d$query))
+
+d <- cbind(freqItemsets,d)
+
+library(DT)
+
+d %>% 
+  mutate(ref = paste0("<a href=",link,">",items,"</a>"),
+         pct = round(support * 100, digits = 1)) %>%
+  select(ref,pct) %>%
+  datatable(rownames = FALSE,
+                colnames = c('Multimorbidity Pattern', '% of Patients'),
+                escape = FALSE)
+```
+
+
+### Care Management
+There are a number of reasons why care management interventions have not consistently been shown to decrease healthcare costs of high utilizers[^5]. One reason is that these patients are clinically heterogeneous, and their conditions are not consistently responsive to treatment. 
+
 ### Care Coordination
-Large itemsets (>4) may be less actionable for cross-disciplinary efforts, especially when these diagnoses fall into different medical specialties, due to the difficulty in coordinating efforts across multiple parties for increasingly small numbers of patients.  That said, the larger itemsets do paint a picture which is helpful for care coordination.
+Large itemsets (>4) may be less actionable for cross-disciplinary efforts, especially when these diagnoses fall into different medical specialties, due to the difficulty in coordinating efforts across multiple parties for increasingly small numbers of patients.  That said, the larger itemsets do paint a picture which is helpful for defining common use cases for coordinating communication between multiple specialists.
 
 ### Analytics Platform
 Display
@@ -65,5 +156,8 @@ Display
 
 ---
 ## Notes
-[^1]: [Freeman, E., McGuire, C. A., Thomas, J. W., & Thayer, D. A. (2014). Factors affecting costs in Medicaid populations with behavioral health disorders. Medical care, 52, S60-S66.](http://journals.lww.com/lww-medicalcare/Fulltext/2014/03001/Factors_Affecting_Costs_in_Medicaid_Populations.12.aspx)
-[^2]: [Zeng, C., Ellis, J. L., Steiner, J. F., Shoup, J. A., McQuillan, D. B., & Bayliss, E. A. (2014). Assessment of morbidity over time in predicting health outcomes. Medical care, 52, S52-S59.](http://journals.lww.com/lww-medicalcare/Fulltext/2014/03001/Assessment_of_Morbidity_Over_Time_in_Predicting.11.aspx)
+[^1]: This report is indebted to research conducted by Johns Hopkins and published in [C. Boyd, B. Leff, C. Weiss, J. Wolff, R. Clark, and T. Richards. Full Report: Clarifying Multimorbidity to Improve Targeting and Delivery of Clinical Services for Medicaid Populations. Center for Health Care Strategies, Inc. December 2010.](http://www.chcs.org/media/Clarifying_Multimorbidity_for_Medicaid_report-FINAL.pdf)
+[^2]: [Freeman, E., McGuire, C. A., Thomas, J. W., & Thayer, D. A. (2014). Factors affecting costs in Medicaid populations with behavioral health disorders. Medical care, 52, S60-S66.](http://journals.lww.com/lww-medicalcare/Fulltext/2014/03001/Factors_Affecting_Costs_in_Medicaid_Populations.12.aspx)
+[^3]: [Zeng, C., Ellis, J. L., Steiner, J. F., Shoup, J. A., McQuillan, D. B., & Bayliss, E. A. (2014). Assessment of morbidity over time in predicting health outcomes. Medical care, 52, S52-S59.](http://journals.lww.com/lww-medicalcare/Fulltext/2014/03001/Assessment_of_Morbidity_Over_Time_in_Predicting.11.aspx)
+[^4]: [Johnson, T. L., Rinehart, D. J., Durfee, J., Brewer, D., Batal, H., Blum, J., ... & Gabow, P. (2015). For Many Patients Who Use Large Amounts Of Health Care Services, The Need Is Intense Yet Temporary. Health Affairs, 34(8), 1312-1319.](http://content.healthaffairs.org/content/34/8/1312.full)
+[^5]: [Williams, Brent C. (2015). Limited Effects of Care Management for High Utilizers on Total Healthcare Costs. AJMC. Published Online: May 07, 2015](http://www.ajmc.com/journals/issue/2015/2015-vol21-n4/limited-effects-of-care-management-for-high-utilizers-on-total-healthcare-costs)

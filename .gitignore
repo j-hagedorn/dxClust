@@ -50,6 +50,9 @@ Temporary Items
 *.RData
 *.rda
 *.Rdata
+*.RDatatmp
+
+*.html
 
 # History files
 .Rhistory
