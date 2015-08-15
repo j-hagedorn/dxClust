@@ -1,6 +1,6 @@
 
 #rules <- apriori(myTrans, parameter=list(supp=.05,conf=.1,minlen=2))
-oPut <- eclat(patientTrans, parameter=list(supp=.01,minlen=2,maxlen=250))
+oPut <- eclat(patientTrans, parameter=list(supp=.03,minlen=2,maxlen=25))
 oPut <- sort(oPut, by="support", decreasing=TRUE)
 freqItemsets <- as(oPut,"data.frame")
 numItemsets = length(oPut)
