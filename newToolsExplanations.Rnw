@@ -1,0 +1,122 @@
+\documentclass{article}
+
+\newcommand\Rsoft{\textbf{R}}
+
+\usepackage[sc]{mathpazo}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\geometry{verbose,tmargin=2.5cm,bmargin=2.5cm,lmargin=2.5cm,rmargin=2.5cm}
+\setcounter{secnumdepth}{2}
+\setcounter{tocdepth}{2}
+\usepackage{url}
+\usepackage[unicode=true,pdfusetitle,
+ bookmarks=true,bookmarksnumbered=true,bookmarksopen=true,bookmarksopenlevel=2,
+ breaklinks=false,pdfborder={0 0 1},backref=false,colorlinks=false]
+ {hyperref}
+\hypersetup{
+ pdfstartview={XYZ null null 1}}
+\usepackage{breakurl}
+\usepackage{enumitem}
+
+\begin{document}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{3.2mm}
+\setlength{\topsep}{0pt}
+\setlength{\itemsep}{0pt}
+\setlength{\parsep}{0pt}
+\setlist{parsep=-18pt}
+\setlist{itemsep=-3pt}
+
+<<setup, include=FALSE, cache=FALSE, message=FALSE, warning=FALSE>>=
+require(arules)
+require(dplyr)
+require(knitr)
+options(keep.blank.line=FALSE)
+options(width=90)
+# set global chunk options
+opts_chunk$set(
+  tidy=TRUE,
+  dev='pdf',
+  fig.width=5, fig.height=2,
+  fig.align='center',
+  fig.show='hold',
+  keep.source=TRUE,
+  comment=NA
+)
+@
+
+{\Large{\textbf{A Brief Primer on Software Tools}}}\\
+authored by Thomas Scofield
+
+This document gives an example of what a data processing session might look like using the revised tools found in \texttt{loadTransactions2.R} and \texttt{processDat2.R}.  It is assumed that the data file \texttt{tbdatUpdated.csv} is in the working directory, and has a particular format matching the data files which have been supplied by TBD Solutions, Inc.~for data analysis related to this project before now.  This format includes patient claim data for which three different levels of specifity, called \texttt{CCS.Level.1}, \texttt{CCS.Level.2} and \texttt{CCS.Level.3}.
+
+The present mode of analysis relies on the data in \texttt{CCS.Level.3} as the primary indicator of patient conditions, which is natural as it provides the greatest specificity.  While some steps have been taken in the \Rsoft\ code to make it easy to switch to an analysis \textit{based} on \texttt{CCS.Level.2}, this does not happen and will not without some further changes to code not explained here.
+
+There are several settings the user can tweak which appear in the first few lines of code in \texttt{processDat2.R}.  The main purpose of this document is to explain why one tweaks these settings, and what changes are appropriate.  As a first run, we use the scripts with the current settings, sourcing them:
+<<message=FALSE, warning=FALSE>>=
+source("loadTransactions2.R")
+source("processDat2.R")
+@
+This may result in a non-trivial amount of processing time; with current settings, perhaps 10 minutes or more.  when processing is complete, new data structures/variables will exist.
+
+The main variable containing data of interest is called \texttt{freqItemsets}.  It is a data structure, in \Rsoft\ called a \textit{data frame}, having two variables: \texttt{items} and \texttt{support}.
+<<>>=
+names(freqItemsets)
+@
+If we look at the first frequent itemset in this data frame, it may not be as informative as one expects.
+<<>>=
+freqItemsets[1,]
+@
+The value of \texttt{items}, rather than \textit{giving} the names of morbidity conditions that occur frequently together in the dataset, \textit{point to} those conditions, which are stored separately in the list (another data frame, to be technical) called \texttt{ccs3}; the main avenue provided in this software to seeing the details of these items is via the \texttt{elaborateItemset()} function:
+<<>>=
+elaborateItemset(1)     # arg "1"" indicates 1st frequent itemset is desired
+@
+
+Moving on to the \texttt{support} column of \texttt{freqItemset}, this indicates what portion of patients included in the dataset have conditions found in this particular itemset.  If you view a larger portion of the list of \texttt{freqItemsets}
+<<>>=
+head(freqItemsets)
+@
+you note that they have been ordered by descending value in the \texttt{support} column.  This brings us to one of the settings a user may wish to tweak.  The user can specify a lower \textit{bound} for the supports of itemsets designated as \textit{frequent}.  One generally doesn't want to call a comorbidity condition "frequent" if there is only one patient in the entire dataset who \textit{has} it.  If we consider comorbidity conditions \textit{frequent} when, say, they appear in at least 3\% of patients, we can include a line at the start of \texttt{processDat2.R} which says
+<<eval=FALSE>>=
+supportThreshold = 0.03
+@
+Tweaking this value to be higher will result in fewer itemsets designated as "frequent", decreasing processing time; setting it lower produces more, increasing processing time.
+
+Continuing with user settings, there are two other lines at the start of \texttt{processDat2.R} which similarly affect the search for frequent itemsets.
+<<eval=FALSE>>=
+itemsetMinLength = 2
+itemsetMaxLength = 20
+@
+The problem of focus in this dataset is to find \textit{comorbidity} conditions; we consider them interesting because more than one morbidity condition is being experienced by patients who might benefit from treatment which takes these multiple conditions into account.  Thus, an itemset with just one condition should not be flagged for us.  We may even decide that having just two morbidity conditions in an itemset is too few to be of interest.  On the other hand, patients with the same 20 morbidity conditions may occur regularly, but we may not feel the research into treatment of this many conditions at once warrants including them in our search.  The lines above are used to set upper and lower bounds on the number of morbidity conditions an itemset that is flagged by the software can contain.
+
+The last user setting, found, again, at the start of \texttt{processDat2.R}, is
+<<eval=FALSE>>=
+ccsLevelToCross = 1
+@
+Valid settings are 0, 1 or 2.  The idea here is that, while many patients may have a combination of morbidity conditions such as
+\begin{quote}
+PULMONARY ARTERY ANOMALIES\\
+CONGENITAL INSUFFICIENCY OF AORTIC VALVE\\
+ENDOCARDIAL CUSHION DEFECTS
+\end{quote}
+but, as these are all conditions of the heart and may not call for the same scrutiny as other comorbidity conditions, as a (heart) medical specialist may already have sufficient expertise to consider them together.  Our dataset provides indicators of this, as these three conditions all have the same \texttt{CCS.Level.2} value (and, necessarily, the same \texttt{CCS.Level.1} value).  Assuming we want the software to flag itemsets only when they include morbidity conditions with differing \texttt{CCS.Level.1} values, we will set the value of \texttt{ccsLevelToCross} as above.  If, instead, we wish to relax things so that an itemset can be flagged if it contains morbidity conditions of differing \texttt{CCS.Level.2} values, we will set \texttt{ccsLevelToCross} to 2; this expresses a greater openness to flagging frequent itemsets than when it is set to 1.  The greatest openness occurs when the value is set to 0 for, in this case, an itemset can be \textit{frequent} even if all its morbidity conditions come from the same CCS Level 1 and CCS Level 2 specifications.
+
+Along with \texttt{elaborateItemset()}, two more support functions have been included in the software to help one explore the results.  These are \texttt{itemsetPatientIDs()} and \texttt{patientItemsets()}.  The former is used to list those patients, by patient id, who are part of the \textit{support} of a particular frequent itemset.  That is, the list produced by the command
+<<eval=FALSE>>=
+itemsetPatientIDs(1)
+@
+is the ids of the patients in the dataset whose morbidity conditions include those of the first frequent itemset \texttt{freqItemset[1,]}.  On the other hand, one may wish to know, for a particular patient, which frequent itemsets she belongs to, if any.  This is where the other support function comes in.  We simply need a way to specify which patient.  If, say, the desired patient has id 61238, then we type
+<<>>=
+patientItemsets(id=61238)
+@
+It turns out this function allows us to specify a patient by an alternate method, by \texttt{index}.  The patients from the dataset are in a list called \texttt{pIDs}; here we list the first few:
+<<>>=
+head(pIDs)
+@
+The third one down has id 360023.  We can use either that patient's id, or his number in the list (3), when we call the above function---that is, both of these lines produce the same output:
+<<eval=FALSE>>=
+patientItemsets(id=360023)
+patientItemsets(index=3)
+@
+
+\end{document}

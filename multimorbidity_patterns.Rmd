@@ -38,7 +38,23 @@ Of individuals with multimorbidity patterns with high service use, how many are 
 summary(cars)
 ```
 
+## Methodology
+
 ## Application
+The question of "what items commonly appear together?" is a prevalent one.  It has been asked by many retailers in regards to goods that wind up in customers' "carts" by the time they check out and pay---i.e., the items most often purchased together in a transaction.  The apriori and eclat algorithms were developed for this sort of transactional analysis.  Algorithms written in C by Christian Borgelt have been ported to R, where they are accessed via the arules package.\footnote{The arules package Version 1.1-6 is authored by Michael Hahsler, Christian Buchta, Bettina Gruen, Kurt Hornik, and Christian Borgelt.  Information about this package is available at the url
+http://r-forge.r-project.org/projects/arules/
+The package is available for download and inclusion in one's R installation from various CRAN mirror sites.}
+
+In our analysis, we took a "transaction" to correspond to available data for a single patient.  More specifically, every patient generated one transaction, and the items in that transaction were the conditions reported for that patient.  We, thus, begin with transactional data which might be as depicted in the table below, where each row represents a single patient/transaction.
+
+Insert a table here.
+
+A long list of transactions was generated from the raw data, and used as input to the eclat() function.  The eclat algorithm determined the which comorbidity patterns were most prevalent.  In calling eclat(), it was necessary to specify several parameters, including
+ * support: just what portion of participants
+   should have a comorbidity condition before
+ * minlen: the minimum number of conditions an
+   itemset deemed "frequent" should contain.
+
 
 ### Care Coordination
 Large itemsets (>4) may be less actionable for cross-disciplinary efforts, especially when these diagnoses fall into different medical specialties, due to the difficulty in coordinating efforts across multiple parties for increasingly small numbers of patients.  That said, the larger itemsets do paint a picture which is helpful for care coordination.
