@@ -48,6 +48,7 @@ Temporary Items
 *.db
 *.xlsx
 *.RData
+.RData
 *.rda
 *.Rdata
 *.RDatatmp
